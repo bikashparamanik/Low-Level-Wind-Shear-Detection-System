@@ -1,6 +1,17 @@
 # Low-Level Wind Shear Detection System
 
 The Low-Level Wind Shear Detection System is a web-based application that provides real-time monitoring and alerting for low-level wind shear phenomena. It combines data from multiple sources, including flask APIs and local weather stations, to provide a comprehensive view of wind shear conditions.
+## Dashboard
+
+![Dashboard Screenshot](images/"C:\Users\bikas\OneDrive\Pictures\Screenshots\Screenshot (109).png")
+
+The dashboard provides an intuitive and interactive interface for monitoring wind shear conditions. It includes the following components:
+
+- Wind direction and speed display using a wind compass
+- Runway-specific wind shear monitoring and alerting
+- Wind shear magnitude and direction indicators
+- Visual representation of wind shear history using a wind rose chart
+- Responsive and user-friendly interface
 
 ## Features
 

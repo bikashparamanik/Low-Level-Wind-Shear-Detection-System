@@ -42,8 +42,8 @@ cd Low-Level-Wind-Shear-Detection-System
 3. Install the required dependencies:
 pip install -r requirements.txt
 4. Configure the flask APIs:
-- Update the `app.py` file with the appropriate host and port settings
-- Start the flask APIs by running `python app.py`
+- Update the `main.py` file with the appropriate host and port settings
+- Start the flask APIs by running `python main.py`
 
 5. Configure the Django web application:
 - Update the `settings.py` file with the necessary database and other settings
@@ -64,10 +64,6 @@ pip install -r requirements.txt
 ## Contributing
 
 Contributions to the Low-Level Wind Shear Detection System are welcome. If you find any issues or have suggestions for improvements, please open an issue or submit a pull request on the GitHub repository.
-
-## License
-
-This project is licensed under the [MIT License](LICENSE).
 
 ## Acknowledgements
 

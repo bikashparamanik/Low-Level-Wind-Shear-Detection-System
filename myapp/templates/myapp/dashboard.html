@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Wind Shear Detection System</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 1450px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 5px;
+            background-color: #343a40;
+            color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .dashboard-header h1 {
+            font-size: 40px;
+            margin-bottom: 20px;
+        }
+        .dashboard-header p {
+            font-size: 18px;
+            margin: 0;
+        }
+        .dropdown-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .dropdown-container select,
+        .dropdown-container input {
+            padding: 10px 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            outline: none;
+            background-color: #fff;
+        }
+        .wind-data-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            /* Align items vertically */
+        }
+        .wind-compass-container {
+            position: absolute;
+            bottom: -100px; /* Pinned to the bottom of the container or page */
+            left: 0; /* Pinned to the left of the container or page */
+            width: 48%;
+            margin: 0; /* Move compass up */
+        }
+        .wind-data-table-container {
+            width: 48%;
+            display: flex; /* Use flexbox to remove gaps */
+        }
+        .wind-compass {
+            position: relative;
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            border: 2px solid #333;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+        }
+        .compass-circle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background-color: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .label {
+            position: absolute;
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+        }
+        .n {
+            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .ne {
+            top: 20px;
+            right: 20px;
+        }
+        .e {
+            top: 50%;
+            right: 5px;
+            transform: translateY(-50%);
+        }
+        .se {
+            bottom: 20px;
+            right: 20px;
+        }
+        .s {
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .sw {
+            bottom: 20px;
+            left: 20px;
+        }
+        .w {
+            top: 50%;
+            left: 5px;
+            transform: translateY(-50%);
+        }
+        .nw {
+            top: 20px;
+            left: 20px;
+        }
+        .wind-arrow-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+        .needle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center center;
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 75px solid #004488;
+            transition: transform 1s ease-in-out;
+        }
+        .wind-data-box {
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 5px;
+            text-align: center;
+            width: 100px;
+            height: 80px;
+            margin: 0px;
+        }
+        .wind-data-box h4 {
+            margin-bottom: 2px;
+            color: #333;
+            font-size: 16px;
+        }
+        .wind-data-box p {
+            margin: 0;
+            color: #111;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .wind-shear-warning {
+            position: absolute;
+            bottom: 20px;
+            left: 8x;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            z-index: 1;
+        }
+        .wind-shear-warning .red-flag {
+            width: 20px;
+            height: 20px;
+            background-color: red;
+            margin-right: 10px;
+        }
+        .wind-rose-container {
+            width: 400px;
+            height: 400px;
+            position: absolute;
+            top: 90%;
+            right: 0;
+            transform: translateY(-50%);
+        }
+        .wind-rose-circle {
+            fill: none;
+            stroke: #ccc;
+            stroke-width: 2px;
+        }
+        .wind-shear-dot {
+            fill: green;
+            stroke: none;
+        }
+        .wind-shear-dot.warning {
+            fill: red;
+        }
+        .runway-container {
+            position: absolute;
+            top: 90%; /* Adjusted from 50% to 60% */
+            left: 60%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .runway {
+            position: relative;
+            width: 40px;
+            height: 100%;
+            background-color: #ccc;
+        }
+        .runway-marker {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 5px;
+            background-color: red;
+        }
+        .wind-rose-title {
+            position: absolute;
+            top: -60px;
+            left: 40%;
+            transform: translateX(-50%);
+            font-size: 25px;
+            
+            color: #333;
+        }
+        .runway-label-top,
+    .runway-label-bottom {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 14px;
+        font-weight: bold;
+    }
+
+    .runway-label-top {
+        top: -20px;
+    }
+
+    .runway-label-bottom {
+        bottom: -20px;
+    }
+
+    .station-wind-speed {
+        position: absolute;
+        text-align: center;
+        font-size: 12px;
+    }
+
+
+    .wind-speed-symbol {
+        width: 30px;
+        height: 30px;
+        margin: 5px auto;
+        border-radius: 50%;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .wind-speed-symbol .symbol {
+        display: none;
+        position: relative;
+        color: #fff;
+        font-weight: bold;
+        font-size: 14px;
+    }
+    
+    .wind-speed-symbol .symbol.active {
+        display: flex;
+        align-items: center;
+    }
+    
+    .wind-speed-symbol .symbol .speed {
+        font-size: 10px;
+        margin-left: 2px;
+    }
+    
+    .wind-speed-symbol .missing {
+        background-color: #999;
+    }
+    
+    .wind-speed-symbol .obscured {
+        background-color: #777;
+    }
+    
+    .wind-speed-symbol .clouds-25 {
+        background-color: #555;
+    }
+    
+    .wind-speed-symbol .partly-cloudy-50 {
+        background-color: #333;
+    }
+    
+    .wind-speed-symbol .mostly-cloudy-75 {
+        background-color: #222;
+    }
+    
+    .wind-speed-symbol .overcast-100 {
+        background-color: #111;
+    }
+    .shear-data-container {
+        position: absolute;
+        top: -20px;
+        right: 35px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1;
+    }
+    
+    .shear-data-container .wind-data-box {
+        width: 100px;
+        height: 80px;
+        margin: 0;
+    }
+    
+    .shear-data-container .wind-data-box-5 {
+        margin-bottom: 0;
+    }
+    
+    .shear-data-container .wind-data-box-6 {
+        margin-top: 0;
+    }
+    .wind-speed-symbol .symbol {
+        display: none;
+    }
+
+    .wind-speed-symbol .symbol.active {
+        display: block;
+    }
+    
+        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard-header">
+            <img style="float: right;" width="120" src="https://images.collegedunia.com/public/college_data/images/logos/1645797335Screenshot20220225192448.png" alt="christ lavasa logo">
+            <img style="float: left; margin-top: -17px;" width="100" src="https://play-lh.googleusercontent.com/FQvW7bq2oQGDg94iKkiti-smd8sg399qjxkl43sJgUfNK04BHz3QppSh1Vo6EVJJEg=w240-h480-rw" alt="IMD logo">
+            <h1>Low Level Wind Shear Alarming System</h1>
+        </div>
+
+        <div class="dropdown-container">
+            <div>
+                <label for="runway">Runway:</label>
+                <select id="runway">
+                    <option value="all">All</option>
+                    <option value="18TDZ">18TDZ</option>
+                    <option value="34">34</option>
+                    <option value="27LTDZ">27-L-TDZ</option>
+                    <option value="9-L-TDZ">9-L-TDZ</option>
+                </select>
+            </div>
+            <div>
+                <label for="data-options">Data Options:</label>
+                <select id="data-options">
+                    <option value="instant">Instant Data</option>
+                    <option value="1min">1min Avg</option>
+                    <option value="2min">2min Avg</option>
+                    <option value="10min">10min Avg</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="wind-data-container">
+            <div class="wind-data-table-container">
+                <div class="wind-data-box wind-data-box-1">
+                    <h4>WD <br>(Degree)<br></h4>
+                    <p>{{ latest_wind_data.wind_direction_instantaneous|default_if_none:'' }}</p>
+                </div>
+                <div class="wind-data-box wind-data-box-2">
+                    <h4>WS <br>(Kt)<br> </h4>
+                    <p>{{ latest_wind_data.wind_speed_instantaneous|floatformat:1|default_if_none:'' }}</p>
+                </div>
+                <div class="wind-data-box wind-data-box-3">
+                    <h4>Head Wind (Kt)</h4>
+                    <p>{{ latest_wind_data.head_wind_instantaneous|floatformat:1|default_if_none:'' }}</p>
+                </div>
+                <div class="wind-data-box wind-data-box-4">
+                    <h4>Cross Wind (Kt)</h4>
+                    <p>{{ latest_wind_data.cross_wind_instantaneous_label|default_if_none:'' }}</p>
+                </div>
+                
+            </div>
+            <div class="wind-compass-container">
+                <div class="wind-compass">
+                    <div class="compass-circle">
+                        <span class="label n">N</span>
+                        <span class="label ne">NE</span>
+                        <span class="label e">E</span>
+                        <span class="label se">SE</span>
+                        <span class="label s">S</span>
+                        <span class="label sw">SW</span>
+                        <span class="label w">W</span>
+                        <span class="label nw">NW</span>
+                        <div class="wind-arrow-container">
+                            <div class="needle" id="needle" style="transform: rotate({{ latest_wind_data.wind_direction_instantaneous }}deg);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% if latest_wind_data.wind_speed_instantaneous > 15 %}
+            <div class="wind-shear-warning">
+                <div class="red-flag"></div>
+                <span>Wind Shear: {{ latest_wind_data.wind_speed_instantaneous }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="wind-history-chart-container">
+            <canvas id="windHistoryChart"></canvas>
+        </div>
+        <div class="wind-rose-container">
+            <div class="wind-rose-title">Wind Shear Alarm</div>
+            <svg viewBox="0 0 400 400">
+                <circle class="wind-rose-circle" cx="200" cy="200" r="150"></circle>
+                <circle class="wind-rose-circle" cx="200" cy="200" r="200"></circle>
+                <g id="wind-shear-dots"></g>
+            </svg>
+        </div>
+        <div class="runway-container">
+            <div class="runway">
+                <div class="runway-marker" style="top: 57px;">
+                    <div class="station-wind-speed menambakkam-isro">
+                        <div class="wind-speed-symbol" data-station="MENAMBAKKAM_ISRO">
+                            <div class="symbol missing">M<span class="speed">0</span></div>
+                            <div class="symbol obscured">X<span class="speed">0</span></div>
+                            <div class="symbol clouds-25">C<span class="speed">0</span></div>
+                            <div class="symbol partly-cloudy-50">P<span class="speed">0</span></div>
+                            <div class="symbol mostly-cloudy-75">M<span class="speed">0</span></div>
+                            <div class="symbol overcast-100">O<span class="speed">0</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="runway-marker" style="top: 330px;">
+                    <div class="station-wind-speed ennore-port">
+                        <div class="wind-speed-symbol" data-station="ENNORE_PORT">
+                            <div class="symbol missing">M<span class="speed">0</span></div>
+                            <div class="symbol obscured">X<span class="speed">0</span></div>
+                            <div class="symbol clouds-25">C<span class="speed">0</span></div>
+                            <div class="symbol partly-cloudy-50">P<span class="speed">0</span></div>
+                            <div class="symbol mostly-cloudy-75">M<span class="speed">0</span></div>
+                            <div class="symbol overcast-100">O<span class="speed">0</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="runway-label-top">27-L-TDZ</div>
+            <div class="runway-label-bottom">9-L-TDZ</div>
+            <div class="shear-data-container">
+                <div class="wind-data-box wind-data-box-5">
+                    <h4>Shear Magnitude</h4>
+                    <p>{{ latest_wind_data.shear_magnitude|floatformat:1|default_if_none:'' }}</p>
+                </div>
+                <div class="wind-data-box wind-data-box-6">
+                    <h4>Shear Direction</h4>
+                    <p>{{ latest_wind_data.shear_direction|floatformat:1|default_if_none:'' }}</p>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    
+    <script>
+        function updateWindShearRose(data) {
+            var shearHistory = data.shear_history;
+            var dotsContainer = document.getElementById('wind-shear-dots');
+            dotsContainer.innerHTML = '';
+
+            for (var i = 0; i < shearHistory.length; i++) {
+                var shear = shearHistory[i];
+                var shearDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                shearDot.setAttribute('class', 'wind-shear-dot' + (shear.magnitude >= 40 ? ' warning' : ''));
+
+                // Calculate the position of the dot based on shear magnitude and direction
+                var radius = shear.magnitude < 40 ? 150 : 200;
+                var angle = shear.direction * Math.PI / 180;
+                var x = 200 + radius * Math.cos(angle);
+                var y = 200 + radius * Math.sin(angle);
+
+                shearDot.setAttribute('cx', x);
+                shearDot.setAttribute('cy', y);
+                shearDot.setAttribute('r', shear.magnitude >= 40 ? '4' : '2');
+                dotsContainer.appendChild(shearDot);
+            }
+        }
+        function updateWindSpeedSymbols(data) {
+            var menambakkamIsroWindSpeed = data.menambakkam_isro_wind_speed;
+            var ennorePortWindSpeed = data.ennore_port_wind_speed;
+        
+            var menambakkamIsroSymbolClass = getWindSpeedSymbolClass(menambakkamIsroWindSpeed);
+            var ennorePortSymbolClass = getWindSpeedSymbolClass(ennorePortWindSpeed);
+        
+            $('.menambakkam-isro .wind-speed-symbol .symbol').removeClass('active');
+            $('.menambakkam-isro .wind-speed-symbol .' + menambakkamIsroSymbolClass).addClass('active');
+            $('.menambakkam-isro .wind-speed-symbol .' + menambakkamIsroSymbolClass + ' .speed').text(menambakkamIsroWindSpeed);
+        
+            $('.ennore-port .wind-speed-symbol .symbol').removeClass('active');
+            $('.ennore-port .wind-speed-symbol .' + ennorePortSymbolClass).addClass('active');
+            $('.ennore-port .wind-speed-symbol .' + ennorePortSymbolClass + ' .speed').text(ennorePortWindSpeed);
+        }
+
+        function getWindSpeedSymbolClass(windSpeed) {
+            if (isNaN(windSpeed) || windSpeed < 5) {
+                return 'missing';
+            } else if (windSpeed < 10) {
+                return 'obscured';
+            } else if (windSpeed < 15) {
+                return 'clouds-25';
+            } else if (windSpeed < 50) {
+                return 'partly-cloudy-50';
+            } else if (windSpeed < 75) {
+                return 'mostly-cloudy-75';
+            } else {
+                return 'overcast-100';
+            }
+        }
+
+        function updateDashboard() {
+            $.ajax({
+                url: '/wind-data/',
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    if (data.error) {
+                        $('.wind-data-container').html('<p>' + data.error + '</p>');
+                    } else {
+                        updateWindDataBoxes(data);
+                        updateCompassNeedle(data.wind_direction_instantaneous);
+                        updateWindShearWarning(data.wind_speed_instantaneous);
+                        updateWindShearRose(data);
+                        updateWindSpeedSymbols(data); // Call the function here
+                    }
+                },
+                error: function(xhr, status, error) {
+                    $('.wind-data-container').html('<p>Error fetching wind data.</p>');
+                }
+            });
+        }
+    
+
+        function updateWindDataBoxes(data) {
+            $('.wind-data-box-1 p').text(data.wind_direction_instantaneous || '');
+            $('.wind-data-box-2 p').text(data.wind_speed_instantaneous ? data.wind_speed_instantaneous.toFixed(1) : '');
+            $('.wind-data-box-3 p').text(data.head_wind_instantaneous ? data.head_wind_instantaneous.toFixed(1) : '');
+            $('.wind-data-box-4 p').text(data.cross_wind_instantaneous_label || '');
+            $('.wind-data-box-5 p').text(data.shear_magnitude ? data.shear_magnitude.toFixed(1) : '');
+            $('.wind-data-box-6 p').text(data.shear_direction ? data.shear_direction.toFixed(1) : '');
+        }
+
+        function updateCompassNeedle(windDirection) {
+            $('.needle').css('transform', 'translate(-50%, -50%) rotate(' + (90 - windDirection) + 'deg)');
+        }
+
+        function updateWindShearWarning(windSpeed) {
+            if (windSpeed > 15) {
+                $('.wind-shear-warning').show();
+                $('.wind-shear-warning span').text('Self Wind Shear: ' + windSpeed.toFixed(1));
+            } else {
+                $('.wind-shear-warning').hide();
+            }
+        }
+
+        setInterval(updateDashboard, 1000);
+
+        $('#data-options').on('change', function() {
+            var selectedOption = $(this).val();
+            console.log('Selected option:', selectedOption);
+        });
+
+        $('#runway').on('change', function() {
+            updateDashboard();
+        });
+
+        // Initial dashboard update
+        updateDashboard();
+    </script>
+</body>
+</html>

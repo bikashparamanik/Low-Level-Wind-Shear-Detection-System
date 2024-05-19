@@ -50,9 +50,8 @@ The `/newjson` endpoint is part of the Flask API component of the Low-Level Wind
 - Description: Generates and streams new wind shear data entries for two weather stations
 - Response: Server-Sent Events (SSE) stream of JSON objects, where each object represents a wind shear data entry for a specific weather station
 
-## Example Response
-
-```json
+- Example Response:
+  ```json
 {
   "date": "01-06-2023",
   "time": "10:31:00",

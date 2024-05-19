@@ -52,13 +52,13 @@ The `/newjson` endpoint is part of the Flask API component of the Low-Level Wind
 
 - Example Response:
   ```json
-{
+  {
   "date": "01-06-2023",
   "time": "10:31:00",
   "station": "MENAMBAKKAM_ISRO",
   "wind_dir": 270,
   "wind_speed": 30
-}
+  }
 
 ## Usage
 

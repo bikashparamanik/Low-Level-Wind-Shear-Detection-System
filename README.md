@@ -53,13 +53,13 @@ Open your web browser and visit `http://localhost:8000` to access the Low-Level 
 The Django project follows a standard structure:
 django-project/
 ├── low_level_wind_shear_detection_system/
-│   ├── init.py
+│   ├── __init__.py
 │   ├── asgi.py
 │   ├── settings.py
 │   ├── urls.py
 │   └── wsgi.py
 ├── wind_shear_app/
-│   ├── init.py
+│   ├── __init__.py
 │   ├── admin.py
 │   ├── apps.py
 │   ├── models.py

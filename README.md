@@ -60,3 +60,22 @@ The `/newjson` endpoint is part of the Flask API component of the Low-Level Wind
   "wind_dir": 270,
   "wind_speed": 30
 }
+
+## Usage
+
+To retrieve new wind shear data from the `/newjson` endpoint, follow these steps:
+
+1. Make sure the Flask API is running. If not, navigate to the project directory and run the following command:
+python main.py
+2. Send a GET request to `http://localhost:5000/newjson` using an SSE client or by making an HTTP request with the appropriate headers.
+
+3. The API will start streaming wind shear data entries for the two weather stations in real-time.
+
+4. Each data entry will be in JSON format and will contain the following fields:
+- `date`: The date of the wind shear measurement (format: "DD-MM-YYYY")
+- `time`: The time of the wind shear measurement (format: "HH:MM:SS")
+- `station`: The name of the weather station (either "MENAMBAKKAM_ISRO" or "ENNORE_PORT")
+- `wind_dir`: The wind direction in degrees (0-360)
+- `wind_speed`: The wind speed in knots (0-50)
+
+5. Process and utilize the received wind shear data entries as needed in your application.

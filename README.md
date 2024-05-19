@@ -39,12 +39,20 @@ This Flask API generates and streams wind shear data in JSON format for various 
     }
   }
   
-  /newjson
+### `/returnjson`
 
-Method: GET
-Description: Generates and streams new wind shear data entries for two weather stations
-Response: Server-Sent Events (SSE) stream of JSON objects, where each object represents a wind shear data entry for a specific weather station
-Example Response:
+The `/newjson` endpoint is part of the Flask API component of the Low-Level Wind Shear Detection System project. It generates and streams new wind shear data entries for two weather stations: MENAMBAKKAM_ISRO and ENNORE_PORT.
+
+## Endpoint Details
+
+- Method: GET
+- URL: `/newjson`
+- Description: Generates and streams new wind shear data entries for two weather stations
+- Response: Server-Sent Events (SSE) stream of JSON objects, where each object represents a wind shear data entry for a specific weather station
+
+## Example Response
+
+```json
 {
   "date": "01-06-2023",
   "time": "10:31:00",
@@ -52,4 +60,3 @@ Example Response:
   "wind_dir": 270,
   "wind_speed": 30
 }
-
